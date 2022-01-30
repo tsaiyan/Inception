@@ -1,0 +1,46 @@
+#* ************************************************************************** *#
+#*                                                                            *#
+#*                                                        :::      ::::::::   *#
+#*   ft_server                                           :+:      :+:    :+:  *#
+#*                                                    +:+ +:+         +:+     *#
+#*   By: tsaiyan <tsaiyan@42.fr>                    +#+  +:+       +#+        *#
+#*                                                +#+#+#+#+#+   +#+           *#
+#*   Created: 2020/10/31 14:37:58 by tsaiyan           #+#    #+#             *#
+#*   Updated: 2020/10/31 14:38:00 by tsaiyan          ###   ########.fr       *#
+#*                                                                            *#
+#* ************************************************************************** *#
+
+# Default MEDOVAR server
+
+server {
+        listen 80;
+        listen [::]:80;
+	return 301 https://$host$request_uri;
+}
+
+server {
+	# SSL configuration
+	listen 443 ssl;
+	listen [::]:443 ssl;
+	ssl_certificate localhost.crt;
+	ssl_certificate_key localhost.key;
+        
+
+	root /var/www/localhost;
+
+	# php added
+	index index.php index.html index.htm;
+
+	location /wordpress {
+		return 307 http://192.168.99.104:5050/;
+	}
+    location ~ \/phpmyadmin {
+        rewrite ^/phpmyadmin(/.*)$ $1 break;
+        proxy_set_header X-Forwarded-Proto	https;
+        proxy_pass	http://$host:5000;
+    }
+    location ~ \/index.php {
+        return 301   http://$host/phpmyadmin/;
+    }
+}
+
